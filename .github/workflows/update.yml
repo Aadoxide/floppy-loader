@@ -1,0 +1,31 @@
+name: Clean Gist JS
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 * * * *"  # Every hour
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Fetch and clean Gist
+        run: |
+          mkdir -p output
+
+          curl -sL "https://gist.githubusercontent.com/aamiaa/204cd9d42013ded9faf646fae7f89fbb/raw/cc791c930278f12f28eeac6de96c89e91c39c499/" -o raw.md
+
+          awk '/```js/,/```/' raw.md | sed '1d;$d' > output/cleaned.js
+
+      - name: Commit and push cleaned file
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          cp output/cleaned.js .
+          git add cleaned.js
+          git commit -m "Update cleaned.js from gist" || echo "No changes to commit"
+          git push
