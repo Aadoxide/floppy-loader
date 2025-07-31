@@ -5,27 +5,31 @@ on:
   schedule:
     - cron: "0 * * * *"  # Every hour
 
+permissions:
+  contents: write
+
 jobs:
-  build:
+  update-cleaned-js:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
+      - name: Checkout your repo
+        uses: actions/checkout@v3
 
-      - name: Fetch and clean Gist
+      - name: Fetch and extract JS from Gist
         run: |
-          mkdir -p output
+          curl -s https://gist.githubusercontent.com/aamiaa/204cd9d42013ded9faf646fae7f89fbb/raw/cc791c930278f12f28eeac6de96c89e91c39c499/ > full.txt
 
-          curl -sL "https://gist.githubusercontent.com/aamiaa/204cd9d42013ded9faf646fae7f89fbb/raw/cc791c930278f12f28eeac6de96c89e91c39c499/" -o raw.md
+          # Extract between ```js and ```
+          awk '/^```js/{flag=1; next} /^```/{flag=0} flag' full.txt > cleaned.js
 
-          awk '/```js/,/```/' raw.md | sed '1d;$d' > output/cleaned.js
-
-      - name: Commit and push cleaned file
+      - name: Set up Git config
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          cp output/cleaned.js .
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+      - name: Commit and push cleaned.js
+        run: |
           git add cleaned.js
-          git commit -m "Update cleaned.js from gist" || echo "No changes to commit"
+          git diff --cached --quiet || git commit -m "Update cleaned.js"
           git push
