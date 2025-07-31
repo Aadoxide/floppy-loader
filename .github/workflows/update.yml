@@ -1,4 +1,4 @@
-name: Clean Gist JS
+name: OX JS
 
 on:
   workflow_dispatch:
@@ -13,23 +13,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout your repo
+      - name: Crescendo
         uses: actions/checkout@v3
 
-      - name: Fetch and extract JS from Gist
+      - name: Fetch OX JS from Gist
         run: |
           curl -s https://gist.githubusercontent.com/aamiaa/204cd9d42013ded9faf646fae7f89fbb/raw/cc791c930278f12f28eeac6de96c89e91c39c499/ > full.txt
 
-          # Extract between ```js and ```
           awk '/^```js/{flag=1; next} /^```/{flag=0} flag' full.txt > cleaned.js
 
-      - name: Set up Git config
+      - name: Set up config
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-      - name: Commit and push cleaned.js
+      - name: Commit and push OX JS
         run: |
-          git add cleaned.js
-          git diff --cached --quiet || git commit -m "Update cleaned.js"
+          git add ox.js
+          git diff --cached --quiet || git commit -m "update OX JS"
           git push
